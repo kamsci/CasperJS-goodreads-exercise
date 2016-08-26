@@ -27,18 +27,19 @@ casper.test.begin('Goodreads searches for Nexus book and adds to currently-readi
 
   }); 
 
-  casper.then(function() {
+  casper.thenOpen('https://www.goodreads.com/search?q=nexus', function() {
 
     //// Confirm page visual
-    this.capture('search.png');
+    this.capture('/testing-img/search.png');
     console.log('clicked search, new location is ' + this.getCurrentUrl());
 
     test.assertExists('form[action="/shelf/add_to_shelf"]', 'Form Exists: add to shelf');
 
     // Author and Title match
-    require('utils').dump(this.getElementsInfo(xpath('//*[@id="1_book_13642710"]..*')));
-
-    this.echo("book:" + document.querySelector('itemprop').innerText);
+    // require('utils').dump(this.getElementsInfo(xpath('//*[@id="1_book_13642710.."]')));
+    casper.evaluate(function() {
+      this.echo("book:" + document.querySelector('.bookTitle').innerText());   
+    });
 
     // this.echo("Book:" + this.fetchText(book));
 
@@ -56,30 +57,48 @@ casper.test.begin('Goodreads searches for Nexus book and adds to currently-readi
     
     this.click(xpath('//*[@id="1_book_13642710"]/div[2]/div/ul/li[2]/button'));
 
-    //// Check Status
-    // require('utils').dump(this.getElementsInfo(xpath('//*[@id="1_book_13642710"]/div/span')));
 
-    require('utils').dump(this.getElementsInfo(xpath('//title')));
+    // require('utils').dump(this.getElementsInfo(xpath('//title')));
 
-    this.capture('current.png');
+    casper.wait(3000, function () {
+      
+    // Check Status
+    casper.evaluate(function() {
+      require('utils').dump(this.getElementsInfo(xpath('//*[@id="1_book_13642710"]/div/span')));
 
+      if (this.visible(xpath('//*[@id="1_book_13642710"]/div/span'))) {
+        this.echo('Span Visible');
+      } else {
+        this.echo('Span Not Visible');
+      }
+
+    });
+
+      this.capture('/testing-img/current.png');    
+    });
 
   });
-  
-  // casper.then(function() {
-  //   console.log('clicked ok, new location is ' + this.getCurrentUrl());
-  //   this.capture('after-current.png');
-  //   this.echo('Title Reviews: ' + this.getTitle());
-
-  //   test.assertExists('form[action="/user_status"]', 'update book  progress form exists');
-
-  //   this.fill('form[action="/user_status"]', {
-  //     'user_status[page]': 124
-  //   }, true)
-
-  //   test.assertField('user_status[page]', 124);
     
+  // casper.wait(3000, function() {
+  //   casper.then(function() {
+  //     console.log('clicked ok, new location is ' + this.getCurrentUrl());
+  //     this.capture('after-current.png');
+  //     this.echo('Title Reviews: ' + this.getTitle());
+
+  //   });    
   // });
+
+  casper.thenOpen('https://www.goodreads.com/book/show/13642710', function() {
+    test.assertExists('form[action="/user_status"]', 'update book  progress form exists');
+
+    this.
+    this.fill('form[action="/user_status"]', {
+      'user_status[page]': 124
+    }, true)
+
+    test.assertField('user_status[page]', 124);
+
+  });
 
   casper.run(function() {
     test.done();
